@@ -69,7 +69,7 @@ class Cost(object):
     """
     Training cost.
     """
-    def cost(y_true, y_pred):
+    def cost(self, y_true, y_pred):
         """
         Compute cost.
 
@@ -82,7 +82,7 @@ class Cost(object):
         """
         raise NotImplementedError
 
-    def gradient(y_true, y_pred):
+    def gradient(self, y_true, y_pred):
         """
         Compute cost gradient.
 
