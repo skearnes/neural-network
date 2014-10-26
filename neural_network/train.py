@@ -65,8 +65,7 @@ class Trainer(object):
         # update weights and biases
 
 
-
-def Cost(object):
+class Cost(object):
     """
     Training cost.
     """
