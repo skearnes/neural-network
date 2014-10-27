@@ -22,15 +22,15 @@ import numpy as np
 from sklearn.cross_validation import KFold, StratifiedKFold
 
 
-class Dataset(object):
+class DatasetIterator(object):
     """
-    Dataset.
+    Dataset iterator.
 
     Parameters
     ----------
-    X : array_like
-        Features.
-    y : array_like
+    X : array_like, optional
+        Examples.
+    y : array_like, optional
         Labels.
     batch_size : int, optional (default 100)
         Batch size.
@@ -41,8 +41,8 @@ class Dataset(object):
     random_state : int or RandomState, optional
         Random state.
     """
-    def __init__(self, X, y, batch_size=100, stratified=False, shuffle=False,
-                 random_state=None):
+    def __init__(self, X=None, y=None, batch_size=100, stratified=False,
+                 shuffle=False, random_state=None):
         self.X = X
         self.y = y
         self.batch_size = batch_size
@@ -51,6 +51,20 @@ class Dataset(object):
         if not isinstance(random_state, np.random.RandomState):
             random_state = np.random.RandomState(random_state)
         self.random_state = random_state
+
+    def set_dataset(self, X, y=None):
+        """
+        Set dataset.
+
+        Parameters
+        ----------
+        X : array_like
+            Examples.
+        y : array_like, optional
+            Labels.
+        """
+        self.X = X
+        self.y = y
 
     def __iter__(self):
         """

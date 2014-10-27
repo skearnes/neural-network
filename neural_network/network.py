@@ -26,11 +26,52 @@ class Network(object):
     ----------
     layers : list
         Layers.
+    trainer : Trainer, optional
+        Trainer.
     """
-    def __init__(self, layers):
+    def __init__(self, layers, trainer=None):
         self.layers = layers
+        self.trainer = trainer
 
-    def forward(self, x):
+    def set_trainer(self, trainer):
+        """
+        Set trainer.
+
+        Parameters
+        ----------
+        trainer : Trainer
+            Trainer.
+        """
+        self.trainer = trainer
+        self.trainer.set_network(self)
+
+    def fit(self, X, y=None, n_epochs=500):
+        """
+        Train the network.
+
+        Parameters
+        ----------
+        X : array_like
+            Training examples.
+        y : array_like, optional
+            Training labels.
+        n_epochs : int
+            Number of training epochs.
+        """
+        self.trainer.train(self, n_epochs=n_epochs)
+
+    def predict(self, X):
+        """
+        Predict labels for examples.
+
+        Parameters
+        ----------
+        x : array_like
+            Input values.
+        """
+        return self.forward(X)
+
+    def forward(self, X):
         """
         Forward propagation.
 
@@ -40,10 +81,10 @@ class Network(object):
             Input values.
         """
         for layer in self.layers:
-            x = layer.forward(x)
-        return x
+            X = layer.forward(X)
+        return X
 
-    def get_activations_and_gradients(self, x):
+    def get_activations_and_gradients(self, X):
         """
         Get activations and gradient for each layer.
 
@@ -54,8 +95,8 @@ class Network(object):
         """
         activations, gradients = [], []
         for layer in self.layers:
-            x, g = layer.get_activations_and_gradient(x)
-            activations.append(x)
+            X, g = layer.get_activations_and_gradient(X)
+            activations.append(X)
             gradients.append(g)
         return activations, gradients
 

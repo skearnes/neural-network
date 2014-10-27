@@ -19,35 +19,74 @@ from __future__ import division
 
 import numpy as np
 
+from .dataset import DatasetIterator
 
-class Trainer(object):
+
+class SGDTrainer(object):
     """
-    Trainer.
+    SGD trainer.
 
     Parameters
     ----------
-    network : Network
-        Network to train.
-    dataset : Dataset
-        Training dataset.
     cost : Cost
         Training cost.
-    learning_rate : float
+    network : Network, optional
+        Network to train.
+    batch_size : int, optional (default 100)
+        Batch size.
+    stratified : bool, optional (default False)
+        Use stratified partitioning to construct batches.
+    shuffle : bool, optional (default False)
+        Shuffle order of examples for each epoch.
+    random_state : int or RandomState, optional
+        Random state.
+    learning_rate : float, optional (default 1)
         Learning rate.
+    kwargs : dict, optional
+        Keyword arguments for DatasetIterator.
     """
-    def __init__(self, network, dataset, cost, learning_rate=0.1):
-        self.network = network
-        self.dataset = dataset
+    def __init__(self, cost, network=None, learning_rate=1, **kwargs):
         self.cost = cost
+        self.network = network
+        self.learning_rate = learning_rate
+        self.dataset_iterator = DatasetIterator(**kwargs)
+
+    def set_network(self, network):
+        """
+        Set network.
+
+        Parameters
+        ----------
+        network : Network
+            Network to train.
+        """
+        self.network = network
+
+    def fit(self, X, y, n_epochs=100):
+        """
+        Train a network.
+
+        Parameters
+        ----------
+        X : array_like
+            Training examples.
+        y : array_like, optional
+            Training labels.
+        n_epochs : int
+            Number of training epochs.
+        """
+        self.dataset_iterator.set_dataset(X, y)
+        for i in xrange(n_epochs):
+            self.epoch()
 
     def epoch(self):
         """
         Perform a single training epoch.
         """
-        for X, y in self.dataset:
-            self.train(X, y)
+        for X, y in self.dataset_iterator:
+            self.fit_batch(X, y)
 
-    def train(self, X, y):
+    def fit_batch(self, X, y):
         """
         Perform a single training step.
 
