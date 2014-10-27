@@ -15,6 +15,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from __future__ import division
+
+import numpy as np
 
 
 class Trainer(object):
@@ -65,6 +68,7 @@ class Trainer(object):
         # update weights and biases
 
 
+
 class Cost(object):
     """
     Training cost.
@@ -93,3 +97,35 @@ class Cost(object):
         y_pref : array_like
             Predicted labels.
         """
+        raise NotImplementedError
+
+
+class SquaredError(Cost):
+    """
+    Squared error.
+    """
+    def cost(self, y_true, y_pred):
+        """
+        Compute cost.
+
+        Parameters
+        ----------
+        y_true : array_like
+            True labels.
+        y_pref : array_like
+            Predicted labels.
+        """
+        return np.mean(np.square(y_true - y_pred)) / 2
+
+    def gradient(self, y_true, y_pred):
+        """
+        Compute cost gradient.
+
+        Parameters
+        ----------
+        y_true : array_like
+            True labels.
+        y_pref : array_like
+            Predicted labels.
+        """
+        return (y_pred - y_true) / len(y_true)
