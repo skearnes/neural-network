@@ -17,6 +17,8 @@ limitations under the License.
 """
 import numpy as np
 
+from .neuron import SigmoidNeuron
+
 
 class Layer(object):
     """
@@ -99,3 +101,38 @@ class Layer(object):
         """
         self.biases += update
 
+
+class InputLayer(Layer):
+    """
+    Input layer.
+
+    Parameters
+    ----------
+    size : int
+        Layer size.
+    weights : array_like
+        Input weight matrix.
+    biases : array_like, optional
+        Neuron biases. Defaults to 0 for each neuron.
+    """
+    def __init__(self, size, weights, biases=None):
+        super(InputLayer, self).__init__(
+            neuron=None, size=size, weights=weights, biases=biases)
+
+
+class SigmoidLayer(Layer):
+    """
+    Sigmoid layer.
+
+    Parameters
+    ----------
+    size : int
+        Layer size.
+    weights : array_like
+        Input weight matrix.
+    biases : array_like, optional
+        Neuron biases. Defaults to 0 for each neuron.
+    """
+    def __init__(self, size, weights, biases=None):
+        super(SigmoidLayer, self).__init__(
+            neuron=SigmoidNeuron(), size=size, weights=weights, biases=biases)

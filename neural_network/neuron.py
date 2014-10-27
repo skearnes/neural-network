@@ -69,9 +69,9 @@ class Neuron(object):
         return self.activate(z), self.gradient(z)
 
 
-class Sigmoid(Neuron):
+class SigmoidNeuron(Neuron):
     """
-    Sigmoid.
+    Sigmoid neuron.
     """
     def activate(self, z):
         """

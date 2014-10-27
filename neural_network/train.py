@@ -105,7 +105,11 @@ class SGDTrainer(object):
             self.cost.gradient(y, activations[-1]), gradients)
 
         # update weights and biases
+        import IPython
+        IPython.embed()
 
+        for layer in self.network.layers:
+            layer.update_weights(-self.learning_rate)
 
 
 class Cost(object):

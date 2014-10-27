@@ -24,12 +24,14 @@ class Network(object):
 
     Parameters
     ----------
+    input_dim : int
+        Input dimensionality.
     layers : list
         Layers.
     trainer : Trainer, optional
         Trainer.
     """
-    def __init__(self, layers, trainer=None):
+    def __init__(self, input_dim, layers, trainer=None):
         self.layers = layers
         self.trainer = trainer
 
@@ -58,7 +60,7 @@ class Network(object):
         n_epochs : int
             Number of training epochs.
         """
-        self.trainer.train(self, n_epochs=n_epochs)
+        self.trainer.fit(X, y, n_epochs=n_epochs)
 
     def predict(self, X):
         """
