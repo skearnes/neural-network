@@ -24,6 +24,8 @@ class Network(object):
     """
     Network containing one or more layers.
 
+    The network is responsible for all the plumbing between layers.
+
     Parameters
     ----------
     layers : list
@@ -81,50 +83,53 @@ class Network(object):
         x : array_like
             Input values.
         """
-        return self.forward(X)
+        return self.forward(np.asmatrix(X).T)
 
-    def forward(self, X):
+    def forward(self, a):
         """
         Forward propagation.
 
         Parameters
         ----------
-        x : array_like
-            Input values.
+        a : array_like
+            Input activations.
         """
-        for layer in self.layers:
-            X = layer.forward(X)
-        return X
+        for i, layer in enumerate(self.layers[:-1]):
+            z = layer.transform(a)
+            a = self.layers[i+1].activate(z)
+        return a
 
-    def get_activations_and_gradients(self, X):
+    def get_activations_and_gradients(self, a):
         """
         Get activations and gradient for each layer.
 
         Parameters
         ----------
-        X : array_like
-            Input values.
+        a : array_like
+            Input activations.
         """
         activations, gradients = [], []
-        for layer in self.layers:
-            X, g = layer.get_activations_and_gradient(X)
-            activations.append(X)
+        for i, layer in enumerate(self.layers[:-1]):
+            z = layer.transform(a)
+            a, g = layer.get_activations_and_gradient(z)
+            activations.append(a)
             gradients.append(g)
         return activations, gradients
 
-    def backpropagate_errors(self, error, gradients):
+    def backpropagate_errors(self, output_error, gradients):
         """
         Backpropagate errors.
 
         Parameters
         ----------
-        error : array_like
-            Error (cost gradient).
+        output_error : array_like
+            Output error (cost gradient).
         gradients : list
             Gradients for each layer.
         """
-        errors = []
-        for layer, gradient in zip(self.layers[::-1], gradients[::-1]):
-            error = np.multiply(layer.backward(error), gradient)
+        errors = [output_error]
+        error = output_error
+        for i in range(len(self.layers)-1)[::-1]:
+            error = np.multiply(self.layers[i].weights.T * error, gradients[i])
             errors.append(error)
-        return errors
+        return errors[::-1]

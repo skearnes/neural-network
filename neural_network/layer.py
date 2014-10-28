@@ -17,8 +17,6 @@ limitations under the License.
 """
 import numpy as np
 
-from .neuron import SigmoidNeuron
-
 
 class Layer(object):
     """
@@ -31,53 +29,60 @@ class Layer(object):
     size : int
         Layer size.
     weights : array_like
-        Input weight matrix.
+        Weight matrix.
     biases : array_like, optional
-        Neuron biases. Defaults to 0 for each neuron.
+        Biases. Defaults to 0 for each neuron.
     """
-    def __init__(self, neuron, size, weights, biases=None):
-        self.neuron = neuron
+    def __init__(self, size, weights, biases=None):
         self.size = size
-        self.weights = weights
+        self.weights = np.asmatrix(weights)
         if weights is not None and biases is None:
-            biases = np.zeros(weights.shape[0], dtype=float)
-        self.biases = biases
+            biases = np.zeros((weights.shape[0], 1), dtype=float)
+        self.biases = np.asmatrix(biases)
 
-    def forward(self, X):
+    def transform(self, a):
         """
-        Forward propagation.
-
-        Parameters
-        ----------
-        X : array_like
-            Input values.
-        """
-        z = (np.asmatrix(self.weights) * np.asmatrix(X).T).T + self.biases
-        return self.neuron(z)
-
-    def backward(self, X):
-        """
-        Backward propagation.
+        Transform input.
 
         Parameters
         ----------
-        x : array_like
-            Input values.
+        a : array_like
+            Input activations, with examples as columns.
         """
-        z = np.asmatrix(self.weights).T * np.asmatrix(X)
-        return self.neuron(z)
+        return self.weights * a + self.biases
 
-    def get_activations_and_gradient(self, X):
+    def activate(self, z):
         """
-        Get activations and gradient for this layer.
+        Compute activation on transformed input.
 
         Parameters
         ----------
-        x : array_like
-            Input values.
+        z : float
+            Transformed input.
         """
-        z = (np.asmatrix(self.weights) * np.asmatrix(X).T).T + self.biases
-        return self.neuron.get_activations_and_gradient(z)
+        raise NotImplementedError
+
+    def gradient(self, z):
+        """
+        Compute gradient.
+
+        Parameters
+        ----------
+        z : float
+            Weighted and biased input value.
+        """
+        raise NotImplementedError
+
+    def get_activations_and_gradient(self, z):
+        """
+        Compute activations and gradient.
+
+        Parameters
+        ----------
+        z : float
+            Weighted and biased input value.
+        """
+        return self.activate(z), self.gradient(z)
 
     def update_weights(self, update):
         """
@@ -111,13 +116,31 @@ class InputLayer(Layer):
     size : int
         Layer size.
     weights : array_like
-        Input weight matrix.
+        Weight matrix.
     biases : array_like, optional
-        Neuron biases. Defaults to 0 for each neuron.
+        Biases. Defaults to 0 for each neuron.
     """
-    def __init__(self, size, weights, biases=None):
-        super(InputLayer, self).__init__(
-            neuron=None, size=size, weights=weights, biases=biases)
+    def activate(self, z):
+        """
+        Compute activation.
+
+        Parameters
+        ----------
+        z : array_like
+            Transformed input.
+        """
+        return z
+
+    def gradient(self, z):
+        """
+        Compute gradient.
+
+        Parameters
+        ----------
+        z : array_like
+            Transformed input.
+        """
+        return np.asmatrix(np.ones_like(z))
 
 
 class SigmoidLayer(Layer):
@@ -129,10 +152,41 @@ class SigmoidLayer(Layer):
     size : int
         Layer size.
     weights : array_like
-        Input weight matrix.
+        Weight matrix.
     biases : array_like, optional
-        Neuron biases. Defaults to 0 for each neuron.
+        Biases. Defaults to 0 for each neuron.
     """
-    def __init__(self, size, weights, biases=None):
-        super(SigmoidLayer, self).__init__(
-            neuron=SigmoidNeuron(), size=size, weights=weights, biases=biases)
+    def activate(self, z):
+        """
+        Compute activation.
+
+        Parameters
+        ----------
+        z : array_like
+            Transformed input.
+        """
+        return 1 / (1 + np.exp(-z))
+
+    def gradient(self, z):
+        """
+        Compute gradient.
+
+        Parameters
+        ----------
+        z : array_like
+            Transformed input.
+        """
+        a = self.activate(z)
+        return np.multiply(a, 1 - a)
+
+    def get_activations_and_gradient(self, z):
+        """
+        Compute activations and gradient.
+
+        Parameters
+        ----------
+        z : array_like
+            Transformed input.
+        """
+        a = self.activate(z)
+        return a, np.multiply(a, 1 - a)

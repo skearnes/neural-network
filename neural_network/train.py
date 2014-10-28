@@ -98,18 +98,22 @@ class SGDTrainer(object):
             Training labels.
         """
         # get activations and gradients
-        activations, gradients = self.network.get_activations_and_gradients(X)
+        activations, gradients = self.network.get_activations_and_gradients(
+            np.asmatrix(X).T)
 
         # get errors
-        errors = self.network.backpropagate_errors(
-            self.cost.gradient(y, activations[-1]), gradients)
+        output_error = np.multiply(self.cost.gradient(y, activations[-1]),
+                                   gradients[-1])
+        errors = self.network.backpropagate_errors(output_error, gradients)
 
-        # update weights and biases
         import IPython
         IPython.embed()
 
-        for layer in self.network.layers:
-            layer.update_weights(-self.learning_rate)
+        # update weights and biases
+        for i, layer in enumerate(self.network.layers[:-1]):
+            layer.update_weights(
+                self.learning_rate * errors[i+1] * activations[i].T)
+            layer.update_biases(self.learning_rate * errors[i+1])
 
 
 class Cost(object):
