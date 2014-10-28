@@ -39,23 +39,23 @@ class Layer(object):
         self.neuron = neuron
         self.size = size
         self.weights = weights
-        if biases is None:
-            biases = np.zeros(size, dtype=float)
+        if weights is not None and biases is None:
+            biases = np.zeros(weights.shape[0], dtype=float)
         self.biases = biases
 
-    def forward(self, x):
+    def forward(self, X):
         """
         Forward propagation.
 
         Parameters
         ----------
-        x : array_like
+        X : array_like
             Input values.
         """
-        z = np.asmatrix(self.weights) * np.asmatrix(x) + self.biases
+        z = (np.asmatrix(self.weights) * np.asmatrix(X).T).T + self.biases
         return self.neuron(z)
 
-    def backward(self, x):
+    def backward(self, X):
         """
         Backward propagation.
 
@@ -64,10 +64,10 @@ class Layer(object):
         x : array_like
             Input values.
         """
-        z = np.asmatrix(self.weights).T * np.asmatrix(x)
+        z = np.asmatrix(self.weights).T * np.asmatrix(X)
         return self.neuron(z)
 
-    def get_activations_and_gradient(self, x):
+    def get_activations_and_gradient(self, X):
         """
         Get activations and gradient for this layer.
 
@@ -76,7 +76,7 @@ class Layer(object):
         x : array_like
             Input values.
         """
-        z = np.asmatrix(self.weights) * np.asmatrix(x) + self.biases
+        z = (np.asmatrix(self.weights) * np.asmatrix(X).T).T + self.biases
         return self.neuron.get_activations_and_gradient(z)
 
     def update_weights(self, update):

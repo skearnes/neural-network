@@ -17,6 +17,8 @@ limitations under the License.
 """
 import numpy as np
 
+from .layer import InputLayer
+
 
 class Network(object):
     """
@@ -24,15 +26,23 @@ class Network(object):
 
     Parameters
     ----------
-    input_dim : int
-        Input dimensionality.
     layers : list
         Layers.
+    input_dim : int
+        Input dimensionality.
+    input_weights : array_like
+        Input weights.
+    input_biases : array_like, optional
+        Input biases.
     trainer : Trainer, optional
         Trainer.
     """
-    def __init__(self, input_dim, layers, trainer=None):
-        self.layers = layers
+    #TODO don't require explicit weights (we don't know layers[0] dim)
+    #TODO get input_dim from dataset?
+    def __init__(self, layers, input_dim, input_weights, input_biases=None,
+                 trainer=None):
+        input_layer = InputLayer(input_dim, input_weights, biases=input_biases)
+        self.layers = np.concatenate(([input_layer], layers))
         self.trainer = trainer
 
     def set_trainer(self, trainer):
@@ -92,7 +102,7 @@ class Network(object):
 
         Parameters
         ----------
-        x : array_like
+        X : array_like
             Input values.
         """
         activations, gradients = [], []
