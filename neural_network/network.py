@@ -59,6 +59,14 @@ class Network(object):
                 layer.biases = np.asmatrix(
                     np.zeros((self.layers[i+1].size, 1)))
 
+        # handle output layer
+        if self.layers[-1].weights is None:
+            self.layers[-1].weights = np.asmatrix(
+                np.identity(self.layers[-1].size))
+        if self.layers[-1].biases is None:
+            self.layers[-1].biases = np.asmatrix(
+                np.zeros((self.layers[-1].size, 1)))
+
     def set_trainer(self, trainer):
         """
         Set trainer.
@@ -97,35 +105,36 @@ class Network(object):
         """
         return self.forward(np.asmatrix(X).T)
 
-    def forward(self, a):
+    def forward(self, z):
         """
         Forward propagation.
 
         Parameters
         ----------
-        a : array_like
-            Input activations.
+        z : array_like
+            Transformed input.
         """
-        for i, layer in enumerate(self.layers[:-1]):
+        a = None
+        for layer in self.layers:
+            a = layer.activate(z)
             z = layer.transform(a)
-            a = self.layers[i+1].activate(z)
         return a
 
-    def get_activations_and_gradients(self, a):
+    def get_activations_and_gradients(self, z):
         """
         Get activations and gradient for each layer.
 
         Parameters
         ----------
-        a : array_like
-            Input activations.
+        z : array_like
+            Transformed input.
         """
         activations, gradients = [], []
-        for i, layer in enumerate(self.layers[:-1]):
-            z = layer.transform(a)
+        for i, layer in enumerate(self.layers):
             a, g = layer.get_activations_and_gradient(z)
             activations.append(a)
             gradients.append(g)
+            z = layer.transform(a)
         return activations, gradients
 
     def backpropagate_errors(self, output_error, gradients):

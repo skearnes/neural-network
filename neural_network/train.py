@@ -106,14 +106,13 @@ class SGDTrainer(object):
                                    gradients[-1])
         errors = self.network.backpropagate_errors(output_error, gradients)
 
-        import IPython
-        IPython.embed()
-
         # update weights and biases
+        # updates are cumulative over all examples in the batch
         for i, layer in enumerate(self.network.layers[:-1]):
             layer.update_weights(
                 self.learning_rate * errors[i+1] * activations[i].T)
-            layer.update_biases(self.learning_rate * errors[i+1])
+            layer.update_biases(
+                self.learning_rate * np.sum(errors[i+1], axis=1))
 
 
 class Cost(object):
