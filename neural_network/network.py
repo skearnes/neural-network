@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import numpy as np
+import scipy.stats
 
 from .layer import InputLayer
 
@@ -32,20 +33,31 @@ class Network(object):
         Layers.
     input_dim : int
         Input dimensionality.
-    input_weights : array_like
-        Input weights.
-    input_biases : array_like, optional
-        Input biases.
     trainer : Trainer, optional
         Trainer.
     """
     #TODO don't require explicit weights (we don't know layers[0] dim)
     #TODO get input_dim from dataset?
-    def __init__(self, layers, input_dim, input_weights, input_biases=None,
-                 trainer=None):
-        input_layer = InputLayer(input_dim, input_weights, biases=input_biases)
+    def __init__(self, layers, input_dim, trainer=None):
+        input_layer = InputLayer(input_dim)
         self.layers = np.concatenate(([input_layer], layers))
         self.trainer = trainer
+        self.setup()
+
+    def setup(self):
+        """
+        Network setup.
+
+        This method handles network plumbing, weight initialization, etc.
+        """
+        for i, layer in enumerate(self.layers[:-1]):
+            if layer.weights is None:
+                layer.weights = np.asmatrix(
+                    scipy.stats.norm(layer.scale).rvs(
+                        (self.layers[i+1].size, layer.size)))
+            if layer.biases is None:
+                layer.biases = np.asmatrix(
+                    np.zeros((self.layers[i+1].size, 1)))
 
     def set_trainer(self, trainer):
         """

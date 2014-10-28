@@ -28,17 +28,18 @@ class Layer(object):
         Neuron associated with this layer.
     size : int
         Layer size.
-    weights : array_like
+    scale : float, optional (default 0.01)
+        Scale of distribution used to sample initial weights.
+    weights : array_like, optional
         Weight matrix.
     biases : array_like, optional
         Biases. Defaults to 0 for each neuron.
     """
-    def __init__(self, size, weights, biases=None):
+    def __init__(self, size, scale=0.01, weights=None, biases=None):
         self.size = size
-        self.weights = np.asmatrix(weights)
-        if weights is not None and biases is None:
-            biases = np.zeros((weights.shape[0], 1), dtype=float)
-        self.biases = np.asmatrix(biases)
+        self.scale = scale
+        self.weights = weights
+        self.biases = biases
 
     def transform(self, a):
         """
